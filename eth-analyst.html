@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETH ANALYST — SMC · ELLIOTT · FIB</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #060810;
+    --bg2: #0b0f1a;
+    --bg3: #111827;
+    --border: #1e2a3a;
+    --border2: #243040;
+    --text: #c8d8e8;
+    --text2: #7a90a8;
+    --text3: #3a4a5a;
+    --accent: #00d4ff;
+    --accent2: #0088bb;
+    --green: #00e676;
+    --green2: #00c853;
+    --red: #ff3d5a;
+    --red2: #d50035;
+    --yellow: #ffd600;
+    --orange: #ff6d00;
+    --purple: #b388ff;
+    --cyan: #00e5ff;
+    --glow: 0 0 20px rgba(0,212,255,0.15);
+    --glow-green: 0 0 15px rgba(0,230,118,0.2);
+    --glow-red: 0 0 15px rgba(255,61,90,0.2);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Grid noise overlay */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ─── HEADER ─── */
+  #header {
+    position:sticky;
+    top:0;
+    z-index:100;
+    background: rgba(6,8,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    height: 56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo {
+    font-family:'Space Mono',monospace;
+    font-size:16px;
+    color:var(--accent);
+    letter-spacing:3px;
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo-dot {
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:0.4;transform:scale(0.6);}
+  }
+  .header-price {
+    text-align:right;
+    font-family:'Space Mono',monospace;
+  }
+  .price-main {
+    font-size:22px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .price-change {
+    font-size:11px;
+  }
+  .header-controls {
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .btn {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor:pointer;
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:1px;
+    transition: all 0.2s;
+  }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .btn-accent {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-accent:hover { background: rgba(0,212,255,0.2); }
+
+  /* ─── MAIN LAYOUT ─── */
+  #app {
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto 1fr;
+    gap:0;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ─── SIGNAL BANNER ─── */
+  #signal-banner {
+    grid-column: 1/-1;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:20px;
+    background: var(--bg2);
+  }
+  .signal-badge {
+    padding: 8px 24px;
+    border-radius: 4px;
+    font-family:'Space Mono',monospace;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:3px;
+    border: 2px solid;
+    min-width: 140px;
+    text-align:center;
+  }
+  .signal-badge.long { border-color:var(--green); color:var(--green); background: rgba(0,230,118,0.08); box-shadow:var(--glow-green); }
+  .signal-badge.short { border-color:var(--red); color:var(--red); background: rgba(255,61,90,0.08); box-shadow:var(--glow-red); }
+  .signal-badge.wait { border-color:var(--yellow); color:var(--yellow); background: rgba(255,214,0,0.08); }
+  .signal-badge.loading { border-color:var(--text3); color:var(--text3); }
+
+  .signal-meta {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    flex:1;
+  }
+  .signal-title {
+    font-size:16px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:1px;
+  }
+  .signal-reason {
+    font-size:13px;
+    color:var(--text2);
+  }
+
+  .confidence-wrap {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:160px;
+  }
+  .confidence-label {
+    font-size:11px;
+    color:var(--text2);
+    letter-spacing:1px;
+    font-family:'Space Mono',monospace;
+  }
+  .confidence-bar {
+    height:6px;
+    background:var(--bg3);
+    border-radius:3px;
+    overflow:hidden;
+  }
+  .confidence-fill {
+    height:100%;
+    border-radius:3px;
+    transition: width 1s ease;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+  }
+  .confidence-pct {
+    font-family:'Space Mono',monospace;
+    font-size:20px;
+    font-weight:700;
+    color:var(--accent);
+  }
+
+  .rrr-info {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:200px;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+  }
+  .rrr-row { display:flex; justify-content:space-between; gap:20px; }
+  .rrr-label { color:var(--text2); }
+  .rrr-val { font-weight:700; }
+  .rrr-val.green { color:var(--green); }
+  .rrr-val.red { color:var(--red); }
+  .rrr-val.yellow { color:var(--yellow); }
+
+  /* ─── CHART AREA ─── */
+  #chart-area {
+    grid-column:1;
+    padding: 16px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .tf-tabs {
+    display:flex;
+    gap:6px;
+  }
+  .tf-tab {
+    padding:5px 14px;
+    border-radius:3px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text2);
+    cursor:pointer;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    transition:all 0.2s;
+  }
+  .tf-tab.active { background:rgba(0,212,255,0.1); border-color:var(--accent); color:var(--accent); }
+  .tf-tab:hover:not(.active) { border-color:var(--border2); color:var(--text); }
+
+  .chart-container {
+    position:relative;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  canvas {
+    display:block;
+  }
+  .chart-overlay {
+    position:absolute;
+    top:10px;
+    left:10px;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--text3);
+    pointer-events:none;
+  }
+  .chart-crosshair-info {
+    position:absolute;
+    top:10px;
+    right:10px;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    background:rgba(6,8,16,0.9);
+    border:1px solid var(--border);
+    padding:6px 10px;
+    border-radius:3px;
+    display:none;
+    pointer-events:none;
+  }
+  .volume-label {
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    color:var(--text3);
+  }
+
+  /* ─── RIGHT PANEL ─── */
+  #right-panel {
+    grid-column:2;
+    grid-row:2/4;
+    border-left:1px solid var(--border);
+    overflow-y:auto;
+    background:var(--bg2);
+    display:flex;
+    flex-direction:column;
+  }
+  #right-panel::-webkit-scrollbar { width:4px; }
+  #right-panel::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+  .panel-section {
+    border-bottom:1px solid var(--border);
+    padding:14px 16px;
+  }
+  .section-title {
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--text3);
+    font-family:'Space Mono',monospace;
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+
+  /* Confluence score grid */
+  .confluence-grid {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .conf-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .conf-name {
+    font-size:12px;
+    color:var(--text2);
+    min-width:100px;
+    font-weight:600;
+  }
+  .conf-bar-wrap {
+    flex:1;
+    height:4px;
+    background:var(--bg3);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .conf-bar-fill {
+    height:100%;
+    border-radius:2px;
+    transition:width 0.8s ease;
+  }
+  .conf-score {
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    min-width:30px;
+    text-align:right;
+  }
+
+  /* Elliott */
+  .elliott-display {
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .wave-tag {
+    padding:3px 8px;
+    border-radius:3px;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    font-weight:700;
+    border:1px solid;
+  }
+  .wave-tag.impulse { border-color:var(--green); color:var(--green); background:rgba(0,230,118,0.08); }
+  .wave-tag.corrective { border-color:var(--orange); color:var(--orange); background:rgba(255,109,0,0.08); }
+  .wave-tag.active { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,0.1); animation:borderPulse 1.5s infinite; }
+  @keyframes borderPulse {
+    0%,100%{box-shadow:none;}
+    50%{box-shadow:0 0 8px rgba(0,212,255,0.4);}
+  }
+
+  /* Fib levels */
+  .fib-grid {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .fib-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:3px 6px;
+    border-radius:3px;
+    border-left:2px solid transparent;
+    font-size:12px;
+  }
+  .fib-row.active-fib {
+    background:rgba(0,212,255,0.05);
+    border-left-color:var(--accent);
+  }
+  .fib-level { color:var(--text2); font-family:'Space Mono',monospace; font-size:10px; }
+  .fib-price { font-weight:600; font-family:'Space Mono',monospace; font-size:11px; }
+  .fib-dist { font-size:10px; color:var(--text3); }
+
+  /* SMC markers */
+  .smc-list {
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .smc-item {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 8px;
+    background:var(--bg3);
+    border-radius:3px;
+    font-size:12px;
+  }
+  .smc-tag {
+    padding:2px 7px;
+    border-radius:2px;
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1px;
+  }
+  .smc-tag.bos { background:rgba(0,230,118,0.2); color:var(--green); }
+  .smc-tag.choch { background:rgba(255,61,90,0.2); color:var(--red); }
+  .smc-tag.ob { background:rgba(179,136,255,0.2); color:var(--purple); }
+  .smc-tag.fvg { background:rgba(0,229,255,0.2); color:var(--cyan); }
+  .smc-tag.liq { background:rgba(255,214,0,0.2); color:var(--yellow); }
+  .smc-price { font-family:'Space Mono',monospace; font-size:11px; color:var(--text); }
+  .smc-tf { font-size:10px; color:var(--text3); margin-left:auto; }
+
+  /* Signal log */
+  .log-list {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:300px;
+    overflow-y:auto;
+  }
+  .log-list::-webkit-scrollbar { width:3px; }
+  .log-list::-webkit-scrollbar-thumb { background:var(--border2); }
+  .log-item {
+    padding:8px 10px;
+    background:var(--bg3);
+    border-radius:3px;
+    border-left:3px solid;
+    font-size:12px;
+  }
+  .log-item.pending { border-color:var(--yellow); }
+  .log-item.correct { border-color:var(--green); }
+  .log-item.wrong { border-color:var(--red); }
+  .log-item.invalidated { border-color:var(--text3); }
+  .log-header { display:flex; justify-content:space-between; margin-bottom:3px; }
+  .log-signal { font-weight:700; letter-spacing:1px; }
+  .log-signal.LONG { color:var(--green); }
+  .log-signal.SHORT { color:var(--red); }
+  .log-signal.WAIT { color:var(--yellow); }
+  .log-time { font-family:'Space Mono',monospace; font-size:9px; color:var(--text3); }
+  .log-body { color:var(--text2); font-size:11px; line-height:1.5; }
+  .log-verdict {
+    margin-top:4px;
+    font-family:'Space Mono',monospace;
+    font-size:9px;
+    letter-spacing:1px;
+  }
+  .log-verdict.correct { color:var(--green); }
+  .log-verdict.wrong { color:var(--red); }
+  .log-verdict.pending { color:var(--yellow); }
+
+  /* Stats */
+  .stats-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .stat-box {
+    background:var(--bg3);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:10px;
+    text-align:center;
+  }
+  .stat-val {
+    font-family:'Space Mono',monospace;
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:2px;
+  }
+  .stat-label {
+    font-size:10px;
+    color:var(--text2);
+    letter-spacing:1px;
+  }
+
+  /* Bottom chart area */
+  #chart-area-bottom {
+    grid-column:1;
+    padding:0 20px 16px;
+    display:flex;
+    gap:12px;
+  }
+  .mini-chart-wrap {
+    flex:1;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    overflow:hidden;
+    padding:10px;
+  }
+  .mini-chart-title {
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--text2);
+    margin-bottom:6px;
+    letter-spacing:1px;
+  }
+
+  /* Loading spinner */
+  .loading-wrap {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    height:300px;
+    color:var(--text2);
+  }
+  .spinner {
+    width:40px;height:40px;
+    border:2px solid var(--border2);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to{transform:rotate(360deg);} }
+
+  /* Status bar */
+  #status-bar {
+    grid-column:1/-1;
+    border-top:1px solid var(--border);
+    padding:6px 20px;
+    display:flex;
+    gap:20px;
+    align-items:center;
+    background:var(--bg2);
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:var(--text3);
+    letter-spacing:1px;
+  }
+  .status-dot { width:6px;height:6px;border-radius:50%; }
+  .status-dot.live { background:var(--green); animation:pulse 2s infinite; }
+  .status-dot.loading { background:var(--yellow); animation:pulse 1s infinite; }
+  .status-dot.error { background:var(--red); }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+  /* Tooltip */
+  .tooltip {
+    position:absolute;
+    background:rgba(6,8,16,0.95);
+    border:1px solid var(--border2);
+    border-radius:4px;
+    padding:8px 12px;
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    pointer-events:none;
+    z-index:200;
+    display:none;
+  }
+
+  /* Self-test */
+  .selftest-grid {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .selftest-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+  }
+  .selftest-icon { font-size:14px; }
+  .selftest-label { color:var(--text2); flex:1; }
+  .selftest-result { font-family:'Space Mono',monospace; font-size:10px; }
+  .selftest-result.ok { color:var(--green); }
+  .selftest-result.warn { color:var(--yellow); }
+  .selftest-result.fail { color:var(--red); }
+
+  @media (max-width:900px) {
+    #app { grid-template-columns:1fr; }
+    #right-panel { grid-column:1; grid-row:auto; border-left:none; border-top:1px solid var(--border); }
+    #chart-area-bottom { flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    ETH ANALYST
+  </div>
+  <div class="header-price">
+    <div class="price-main" id="price-display">---</div>
+    <div class="price-change" id="price-change-display">ETHUSDT · 4H</div>
+  </div>
+  <div class="header-controls">
+    <button class="btn" onclick="refreshAll()">↻ REFRESH</button>
+    <button class="btn btn-accent" onclick="downloadLog()">⬇ EXPORT LOG</button>
+  </div>
+</div>
+
+<div id="app">
+  <!-- Signal Banner -->
+  <div id="signal-banner">
+    <div class="signal-badge loading" id="signal-badge">LOADING</div>
+    <div class="signal-meta">
+      <div class="signal-title" id="signal-title">Analizando mercado...</div>
+      <div class="signal-reason" id="signal-reason">Cargando datos de CoinEx</div>
+    </div>
+    <div class="rrr-info" id="rrr-info">
+      <div class="rrr-row"><span class="rrr-label">ENTRY</span><span class="rrr-val yellow" id="entry-val">---</span></div>
+      <div class="rrr-row"><span class="rrr-label">SL</span><span class="rrr-val red" id="sl-val">---</span></div>
+      <div class="rrr-row"><span class="rrr-label">TP1</span><span class="rrr-val green" id="tp1-val">---</span></div>
+      <div class="rrr-row"><span class="rrr-label">TP2</span><span class="rrr-val green" id="tp2-val">---</span></div>
+      <div class="rrr-row"><span class="rrr-label">R:R</span><span class="rrr-val yellow" id="rr-val">---</span></div>
+    </div>
+    <div class="confidence-wrap">
+      <div class="confidence-label">CONFIDENCE</div>
+      <div class="confidence-pct" id="conf-pct">0%</div>
+      <div class="confidence-bar">
+        <div class="confidence-fill" id="conf-bar" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Area -->
+  <div id="chart-area">
+    <div class="tf-tabs">
+      <button class="tf-tab active" onclick="switchTF('4h')" id="tab-4h">4H</button>
+      <button class="tf-tab" onclick="switchTF('1h')" id="tab-1h">1H</button>
+      <button class="tf-tab" onclick="switchTF('15m')" id="tab-15m">15M</button>
+    </div>
+    <div class="chart-container" id="main-chart-container">
+      <div class="loading-wrap" id="chart-loading">
+        <div class="spinner"></div>
+        <div>Cargando 1000 velas de CoinEx...</div>
+      </div>
+      <canvas id="main-chart" style="display:none"></canvas>
+      <div class="chart-overlay" id="chart-overlay"></div>
+      <div class="chart-crosshair-info" id="crosshair-info"></div>
+      <div class="volume-label">VOL</div>
+    </div>
+  </div>
+
+  <!-- Bottom mini charts -->
+  <div id="chart-area-bottom">
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-title">1H — ESTRUCTURA</div>
+      <canvas id="chart-1h" height="120"></canvas>
+    </div>
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-title">15M — ENTRADA</div>
+      <canvas id="chart-15m" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div id="right-panel">
+
+    <!-- Confluence Score -->
+    <div class="panel-section">
+      <div class="section-title">CONFLUENCIA MULTI-TF</div>
+      <div class="confluence-grid" id="confluence-grid">
+        <div class="conf-row"><span class="conf-name">SMC 4H</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--purple)"></div></div><span class="conf-score" id="cs-smc4h">0</span></div>
+        <div class="conf-row"><span class="conf-name">SMC 1H</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--purple)"></div></div><span class="conf-score" id="cs-smc1h">0</span></div>
+        <div class="conf-row"><span class="conf-name">Elliott</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--cyan)"></div></div><span class="conf-score" id="cs-ell">0</span></div>
+        <div class="conf-row"><span class="conf-name">Fibonacci</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--yellow)"></div></div><span class="conf-score" id="cs-fib">0</span></div>
+        <div class="conf-row"><span class="conf-name">Liquidez</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--orange)"></div></div><span class="conf-score" id="cs-liq">0</span></div>
+        <div class="conf-row"><span class="conf-name">Momentum</span><div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:0%;background:var(--accent)"></div></div><span class="conf-score" id="cs-mom">0</span></div>
+      </div>
+    </div>
+
+    <!-- Elliott Waves -->
+    <div class="panel-section">
+      <div class="section-title">ONDAS DE ELLIOTT</div>
+      <div id="elliott-display" class="elliott-display">
+        <span style="color:var(--text3);font-size:12px">Calculando...</span>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text2)" id="elliott-context"></div>
+    </div>
+
+    <!-- Fibonacci -->
+    <div class="panel-section">
+      <div class="section-title">FIBONACCI</div>
+      <div class="fib-grid" id="fib-grid">
+        <span style="color:var(--text3);font-size:12px">Calculando...</span>
+      </div>
+    </div>
+
+    <!-- SMC Structure -->
+    <div class="panel-section">
+      <div class="section-title">ESTRUCTURA SMC</div>
+      <div class="smc-list" id="smc-list">
+        <span style="color:var(--text3);font-size:12px">Calculando...</span>
+      </div>
+    </div>
+
+    <!-- Auto Self-Test -->
+    <div class="panel-section">
+      <div class="section-title">AUTO TEST ESTRATEGIA</div>
+      <div class="selftest-grid" id="selftest-grid">
+        <span style="color:var(--text3);font-size:12px">Ejecutando...</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="panel-section">
+      <div class="section-title">ESTADÍSTICAS SISTEMA</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-total" style="color:var(--accent)">0</div>
+          <div class="stat-label">SEÑALES</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-acc" style="color:var(--green)">0%</div>
+          <div class="stat-label">PRECISIÓN</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-correct" style="color:var(--green)">0</div>
+          <div class="stat-label">CORRECTAS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-wrong" style="color:var(--red)">0</div>
+          <div class="stat-label">ERRÓNEAS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signal Log -->
+    <div class="panel-section">
+      <div class="section-title">REGISTRO DE SEÑALES</div>
+      <div class="log-list" id="log-list">
+        <span style="color:var(--text3);font-size:12px">Sin señales aún...</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Status Bar -->
+  <div id="status-bar">
+    <div class="status-dot loading" id="status-dot"></div>
+    <span id="status-text">CONECTANDO A COINEX...</span>
+    <span style="margin-left:auto" id="status-time"></span>
+    <span id="status-candles"></span>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════════════
+const STATE = {
+  candles: { '4h': [], '1h': [], '15m': [] },
+  currentTF: '4h',
+  analysis: null,
+  signalLog: [],
+  learningData: { wrongPatterns: [], correctPatterns: [] },
+  isLoading: false,
+  lastUpdate: null,
+  selfTestResults: null
+};
+
+// Persistent log via JSON blob
+function loadLog() {
+  try {
+    const raw = sessionStorage.getItem('eth_signal_log');
+    if (raw) STATE.signalLog = JSON.parse(raw);
+  } catch(e) {}
+}
+function saveLog() {
+  try { sessionStorage.setItem('eth_signal_log', JSON.stringify(STATE.signalLog)); } catch(e) {}
+}
+loadLog();
+
+// ═══════════════════════════════════════════════════════════
+// COINEX API — PUBLIC (no auth needed)
+// ═══════════════════════════════════════════════════════════
+const COINEX_BASE = 'https://api.coinex.com/v1';
+const PROXY = 'https://api.allorigins.win/raw?url=';
+
+async function fetchCandles(market, type, limit = 1000) {
+  // CoinEx public kline endpoint
+  const url = `${COINEX_BASE}/market/kline?market=${market}&type=${type}&limit=${limit}`;
+  try {
+    const resp = await fetch(PROXY + encodeURIComponent(url));
+    const data = await resp.json();
+    if (data.code === 0 && data.data) {
+      // CoinEx format: [timestamp, open, close, high, low, volume, amount, market]
+      return data.data.map(k => ({
+        t: parseInt(k[0]) * 1000,
+        o: parseFloat(k[1]),
+        c: parseFloat(k[2]),
+        h: parseFloat(k[3]),
+        l: parseFloat(k[4]),
+        v: parseFloat(k[5])
+      })).sort((a,b) => a.t - b.t);
+    }
+  } catch(e) {}
+
+  // Fallback: try direct
+  try {
+    const resp2 = await fetch(url);
+    const data2 = await resp2.json();
+    if (data2.code === 0 && data2.data) {
+      return data2.data.map(k => ({
+        t: parseInt(k[0]) * 1000,
+        o: parseFloat(k[1]),
+        c: parseFloat(k[2]),
+        h: parseFloat(k[3]),
+        l: parseFloat(k[4]),
+        v: parseFloat(k[5])
+      })).sort((a,b) => a.t - b.t);
+    }
+  } catch(e) {}
+
+  return null;
+}
+
+// Map TF to CoinEx interval strings
+const TF_MAP = { '4h': '4hour', '1h': '1hour', '15m': '15min' };
+
+// ═══════════════════════════════════════════════════════════
+// ANALYSIS ENGINE
+// ═══════════════════════════════════════════════════════════
+
+// --- Swing detection ---
+function findSwings(candles, lookback = 5) {
+  const highs = [], lows = [];
+  for (let i = lookback; i < candles.length - lookback; i++) {
+    let isHigh = true, isLow = true;
+    for (let j = i - lookback; j <= i + lookback; j++) {
+      if (j === i) continue;
+      if (candles[j].h >= candles[i].h) isHigh = false;
+      if (candles[j].l <= candles[i].l) isLow = false;
+    }
+    if (isHigh) highs.push({ idx: i, price: candles[i].h, t: candles[i].t });
+    if (isLow) lows.push({ idx: i, price: candles[i].l, t: candles[i].t });
+  }
+  return { highs, lows };
+}
+
+// --- BOS / CHoCH Detection ---
+function detectStructure(candles) {
+  const { highs, lows } = findSwings(candles, 3);
+  const events = [];
+  let lastHigh = null, lastLow = null;
+  let trend = 'neutral';
+
+  for (const h of highs) {
+    if (lastHigh && h.price > lastHigh.price) {
+      events.push({ type: 'BOS', dir: 'bullish', price: h.price, idx: h.idx, t: h.t });
+      trend = 'bullish';
+    } else if (lastHigh && h.price < lastHigh.price && trend === 'bullish') {
+      events.push({ type: 'CHoCH', dir: 'bearish', price: h.price, idx: h.idx, t: h.t });
+      trend = 'bearish';
+    }
+    lastHigh = h;
+  }
+  for (const l of lows) {
+    if (lastLow && l.price < lastLow.price) {
+      events.push({ type: 'BOS', dir: 'bearish', price: l.price, idx: l.idx, t: l.t });
+    } else if (lastLow && l.price > lastLow.price && trend === 'bearish') {
+      events.push({ type: 'CHoCH', dir: 'bullish', price: l.price, idx: l.idx, t: l.t });
+      trend = 'bullish';
+    }
+    lastLow = l;
+  }
+
+  events.sort((a,b) => a.idx - b.idx);
+  return { events, trend, highs, lows };
+}
+
+// --- Order Blocks ---
+function detectOrderBlocks(candles) {
+  const obs = [];
+  for (let i = 5; i < candles.length - 5; i++) {
+    const c = candles[i];
+    // Bullish OB: bearish candle before strong bullish move
+    if (c.c < c.o) { // bearish candle
+      let bullishMove = 0;
+      for (let j = i+1; j <= Math.min(i+5, candles.length-1); j++) {
+        if (candles[j].c > c.h) { bullishMove = candles[j].c - c.l; break; }
+      }
+      if (bullishMove > (c.h - c.l) * 2) {
+        obs.push({ type: 'OB', dir: 'bullish', high: c.h, low: c.l, mid: (c.h+c.l)/2, idx: i, t: c.t });
+      }
+    }
+    // Bearish OB: bullish candle before strong bearish move
+    if (c.c > c.o) {
+      let bearishMove = 0;
+      for (let j = i+1; j <= Math.min(i+5, candles.length-1); j++) {
+        if (candles[j].c < c.l) { bearishMove = c.h - candles[j].c; break; }
+      }
+      if (bearishMove > (c.h - c.l) * 2) {
+        obs.push({ type: 'OB', dir: 'bearish', high: c.h, low: c.l, mid: (c.h+c.l)/2, idx: i, t: c.t });
+      }
+    }
+  }
+  return obs.slice(-10);
+}
+
+// --- Fair Value Gaps ---
+function detectFVG(candles) {
+  const fvgs = [];
+  for (let i = 1; i < candles.length - 1; i++) {
+    const prev = candles[i-1], curr = candles[i], next = candles[i+1];
+    // Bullish FVG: gap between prev.h and next.l
+    if (next.l > prev.h && (next.l - prev.h) > 0) {
+      fvgs.push({ type: 'FVG', dir: 'bullish', high: next.l, low: prev.h, idx: i, t: curr.t });
+    }
+    // Bearish FVG
+    if (next.h < prev.l && (prev.l - next.h) > 0) {
+      fvgs.push({ type: 'FVG', dir: 'bearish', high: prev.l, low: next.h, idx: i, t: curr.t });
+    }
+  }
+  return fvgs.slice(-8);
+}
+
+// --- Liquidity Zones ---
+function detectLiquidity(candles) {
+  const { highs, lows } = findSwings(candles, 5);
+  const zones = [];
+  // Equal highs/lows (liquidity pools)
+  const tolerance = 0.002;
+  for (let i = 0; i < highs.length-1; i++) {
+    for (let j = i+1; j < highs.length; j++) {
+      if (Math.abs(highs[i].price - highs[j].price) / highs[i].price < tolerance) {
+        zones.push({ type: 'LIQ', dir: 'sell-side', price: (highs[i].price + highs[j].price)/2, idx: highs[j].idx });
+      }
+    }
+  }
+  for (let i = 0; i < lows.length-1; i++) {
+    for (let j = i+1; j < lows.length; j++) {
+      if (Math.abs(lows[i].price - lows[j].price) / lows[i].price < tolerance) {
+        zones.push({ type: 'LIQ', dir: 'buy-side', price: (lows[i].price + lows[j].price)/2, idx: lows[j].idx });
+      }
+    }
+  }
+  return zones.slice(-6);
+}
+
+// --- Elliott Wave Detection ---
+function detectElliott(candles) {
+  const { highs, lows } = findSwings(candles, 5);
+  const result = { pattern: 'unclear', currentWave: 0, waveLabels: [], confidence: 0, context: '' };
+
+  if (highs.length < 3 || lows.length < 3) return result;
+
+  const recentHighs = highs.slice(-5);
+  const recentLows = lows.slice(-5);
+
+  // Try to identify 5-wave impulse structure
+  // Simplified: detect HH-HL or LL-LH sequences
+  let bullPattern = 0, bearPattern = 0;
+  for (let i = 1; i < recentHighs.length; i++) {
+    if (recentHighs[i].price > recentHighs[i-1].price) bullPattern++;
+    else bearPattern++;
+  }
+  for (let i = 1; i < recentLows.length; i++) {
+    if (recentLows[i].price > recentLows[i-1].price) bullPattern++;
+    else bearPattern++;
+  }
+
+  // Look for Fibonacci ratios between waves
+  const lastLow = recentLows[recentLows.length-1];
+  const lastHigh = recentHighs[recentHighs.length-1];
+  const prevLow = recentLows.length > 1 ? recentLows[recentLows.length-2] : null;
+
+  if (bullPattern > bearPattern) {
+    const wave1 = lastLow && recentHighs.length > 0 ? Math.abs(recentHighs[0].price - recentLows[0].price) : 0;
+    const wave3Est = wave1 * 1.618;
+    result.pattern = 'impulse-bull';
+    result.waveLabels = ['1','2','3','4','5'];
+    result.currentWave = bullPattern >= 4 ? 5 : bullPattern + 1;
+    result.confidence = Math.min(90, 40 + bullPattern * 12);
+    result.context = `Onda ${result.currentWave} activa. ${result.currentWave >= 3 ? 'Máxima extensión esperada' : result.currentWave === 5 ? 'Posible agotamiento' : 'Impulso en desarrollo'}`;
+  } else {
+    result.pattern = 'impulse-bear';
+    result.waveLabels = ['1','2','3','4','5'];
+    result.currentWave = bearPattern >= 4 ? 5 : bearPattern + 1;
+    result.confidence = Math.min(90, 40 + bearPattern * 12);
+    result.context = `Onda bajista ${result.currentWave} activa. ${result.currentWave >= 3 ? 'Momentum bajista fuerte' : result.currentWave === 5 ? 'Posible agotamiento bajista' : 'Impulso bajista en desarrollo'}`;
+  }
+
+  // Check for ABC correction
+  if (result.currentWave === 5) {
+    result.context += ' → Posible corrección ABC próxima';
+  }
+
+  return result;
+}
+
+// --- Fibonacci Levels ---
+function calcFibonacci(candles) {
+  const n = Math.min(50, candles.length);
+  const slice = candles.slice(-n);
+  let high = -Infinity, low = Infinity;
+  for (const c of slice) {
+    if (c.h > high) high = c.h;
+    if (c.l < low) low = c.l;
+  }
+  const range = high - low;
+  const current = candles[candles.length-1].c;
+  const trend = candles[candles.length-1].c > candles[candles.length - Math.round(n/2)].c ? 'bull' : 'bear';
+
+  const levels = trend === 'bull' ? [
+    { label: '0', price: low, type: 'support' },
+    { label: '0.236', price: low + range * 0.236, type: 'support' },
+    { label: '0.382', price: low + range * 0.382, type: 'support' },
+    { label: '0.5', price: low + range * 0.5, type: 'support' },
+    { label: '0.618', price: low + range * 0.618, type: 'golden' },
+    { label: '0.786', price: low + range * 0.786, type: 'support' },
+    { label: '1.0', price: high, type: 'resistance' },
+    { label: '1.272', price: high + range * 0.272, type: 'extension' },
+    { label: '1.618', price: high + range * 0.618, type: 'extension' },
+    { label: '2.618', price: high + range * 1.618, type: 'extension' }
+  ] : [
+    { label: '0', price: high, type: 'resistance' },
+    { label: '0.236', price: high - range * 0.236, type: 'resistance' },
+    { label: '0.382', price: high - range * 0.382, type: 'resistance' },
+    { label: '0.5', price: high - range * 0.5, type: 'resistance' },
+    { label: '0.618', price: high - range * 0.618, type: 'golden' },
+    { label: '0.786', price: high - range * 0.786, type: 'resistance' },
+    { label: '1.0', price: low, type: 'support' },
+    { label: '1.272', price: low - range * 0.272, type: 'extension' },
+    { label: '1.618', price: low - range * 0.618, type: 'extension' },
+    { label: '2.618', price: low - range * 1.618, type: 'extension' }
+  ];
+
+  // Find nearest level
+  let nearest = null, minDist = Infinity;
+  for (const lv of levels) {
+    const d = Math.abs(lv.price - current);
+    if (d < minDist) { minDist = d; nearest = lv; }
+  }
+
+  return { levels, nearest, high, low, trend, current };
+}
+
+// --- Momentum ---
+function calcMomentum(candles) {
+  if (candles.length < 20) return { rsi: 50, macd: 0, trend: 'neutral' };
+
+  // RSI
+  let gains = 0, losses = 0;
+  const period = 14;
+  for (let i = candles.length - period; i < candles.length; i++) {
+    const diff = candles[i].c - candles[i-1].c;
+    if (diff > 0) gains += diff; else losses -= diff;
+  }
+  const rs = gains / (losses || 0.0001);
+  const rsi = 100 - 100 / (1 + rs);
+
+  // Simple MACD-like (EMA12 - EMA26)
+  function ema(data, p) {
+    const k = 2/(p+1);
+    let e = data[0];
+    for (let i = 1; i < data.length; i++) e = data[i]*k + e*(1-k);
+    return e;
+  }
+  const closes = candles.slice(-30).map(c=>c.c);
+  const ema12 = ema(closes, 12), ema26 = ema(closes, 26);
+  const macd = ema12 - ema26;
+
+  return { rsi, macd, trend: macd > 0 ? 'bullish' : 'bearish', rsiLevel: rsi > 70 ? 'overbought' : rsi < 30 ? 'oversold' : 'neutral' };
+}
+
+// --- Volume Profile ---
+function analyzeVolume(candles) {
+  const last20 = candles.slice(-20);
+  const avgVol = last20.reduce((s,c) => s+c.v, 0) / last20.length;
+  const lastVol = candles[candles.length-1].v;
+  const volRatio = lastVol / avgVol;
+  const bullVol = last20.filter(c => c.c > c.o).reduce((s,c)=>s+c.v, 0);
+  const bearVol = last20.filter(c => c.c < c.o).reduce((s,c)=>s+c.v, 0);
+  return { avgVol, lastVol, volRatio, bullVol, bearVol, dominance: bullVol > bearVol ? 'bull' : 'bear' };
+}
+
+// ═══════════════════════════════════════════════════════════
+// SIGNAL ENGINE — Confluencia multi-TF
+// ═══════════════════════════════════════════════════════════
+function generateSignal(candles4h, candles1h, candles15m) {
+  const c4 = candles4h, c1 = candles1h, c15 = candles15m;
+  const current = c4[c4.length-1].c;
+
+  // Run all analyses
+  const struct4h = detectStructure(c4);
+  const struct1h = detectStructure(c1);
+  const obs4h = detectOrderBlocks(c4);
+  const obs1h = detectOrderBlocks(c1);
+  const fvgs4h = detectFVG(c4);
+  const liq4h = detectLiquidity(c4);
+  const elliott4h = detectElliott(c4);
+  const fib4h = calcFibonacci(c4);
+  const fib1h = calcFibonacci(c1);
+  const mom4h = calcMomentum(c4);
+  const mom1h = calcMomentum(c1);
+  const mom15m = calcMomentum(c15);
+  const vol4h = analyzeVolume(c4);
+
+  // ── Score components ──
+  let bullScore = 0, bearScore = 0;
+  const factors = [];
+
+  // 1. SMC 4H trend
+  const smcScore4h = struct4h.trend === 'bullish' ? 18 : struct4h.trend === 'bearish' ? -18 : 0;
+  bullScore += Math.max(0, smcScore4h);
+  bearScore += Math.max(0, -smcScore4h);
+  factors.push({ name: 'SMC 4H', score: Math.abs(smcScore4h), dir: smcScore4h > 0 ? 'bull' : 'bear' });
+
+  // 2. SMC 1H trend
+  const smcScore1h = struct1h.trend === 'bullish' ? 12 : struct1h.trend === 'bearish' ? -12 : 0;
+  bullScore += Math.max(0, smcScore1h);
+  bearScore += Math.max(0, -smcScore1h);
+  factors.push({ name: 'SMC 1H', score: Math.abs(smcScore1h), dir: smcScore1h > 0 ? 'bull' : 'bear' });
+
+  // 3. Recent BOS/CHoCH
+  const recentEvents = struct4h.events.slice(-3);
+  for (const ev of recentEvents) {
+    if (ev.type === 'BOS' && ev.dir === 'bullish') { bullScore += 8; factors.push({ name:'BOS Bull 4H', score:8, dir:'bull' }); }
+    if (ev.type === 'BOS' && ev.dir === 'bearish') { bearScore += 8; factors.push({ name:'BOS Bear 4H', score:8, dir:'bear' }); }
+    if (ev.type === 'CHoCH' && ev.dir === 'bullish') { bullScore += 12; factors.push({ name:'CHoCH Bull 4H', score:12, dir:'bull' }); }
+    if (ev.type === 'CHoCH' && ev.dir === 'bearish') { bearScore += 12; factors.push({ name:'CHoCH Bear 4H', score:12, dir:'bear' }); }
+  }
+
+  // 4. OB proximity
+  for (const ob of obs4h.slice(-3)) {
+    const dist = Math.abs(ob.mid - current) / current;
+    if (dist < 0.015) {
+      if (ob.dir === 'bullish') { bullScore += 10; factors.push({ name:'OB Bull 4H', score:10, dir:'bull' }); }
+      if (ob.dir === 'bearish') { bearScore += 10; factors.push({ name:'OB Bear 4H', score:10, dir:'bear' }); }
+    }
+  }
+
+  // 5. Elliott wave
+  if (elliott4h.pattern === 'impulse-bull') {
+    const wv = elliott4h.currentWave;
+    if (wv === 3) { bullScore += 15; factors.push({ name:`Elliott Onda ${wv}↑`, score:15, dir:'bull' }); }
+    else if (wv === 5) { bearScore += 8; factors.push({ name:`Elliott Onda ${wv} (agot.)`, score:8, dir:'bear' }); }
+    else if (wv === 1 || wv === 2) { bullScore += 8; factors.push({ name:`Elliott Onda ${wv}↑`, score:8, dir:'bull' }); }
+  } else if (elliott4h.pattern === 'impulse-bear') {
+    const wv = elliott4h.currentWave;
+    if (wv === 3) { bearScore += 15; factors.push({ name:`Elliott Onda ${wv}↓`, score:15, dir:'bear' }); }
+    else if (wv === 5) { bullScore += 8; factors.push({ name:`Elliott Onda ${wv} (agot.)`, score:8, dir:'bull' }); }
+    else if (wv === 1 || wv === 2) { bearScore += 8; factors.push({ name:`Elliott Onda ${wv}↓`, score:8, dir:'bear' }); }
+  }
+
+  // 6. Fibonacci
+  if (fib4h.nearest) {
+    const dist = Math.abs(fib4h.nearest.price - current) / current;
+    if (dist < 0.01) {
+      if (fib4h.nearest.label === '0.618' || fib4h.nearest.label === '0.5') {
+        if (fib4h.trend === 'bull') { bullScore += 12; factors.push({ name:`Fib ${fib4h.nearest.label} (retroceso)`, score:12, dir:'bull' }); }
+        else { bearScore += 12; factors.push({ name:`Fib ${fib4h.nearest.label} (retroceso)`, score:12, dir:'bear' }); }
+      }
+      if (fib4h.nearest.type === 'extension') {
+        if (fib4h.trend === 'bull') { bearScore += 8; factors.push({ name:`Fib ${fib4h.nearest.label} (extensión)`, score:8, dir:'bear' }); }
+      }
+    }
+  }
+
+  // 7. Momentum multi-TF
+  const momBull = [mom4h, mom1h, mom15m].filter(m => m.trend === 'bullish').length;
+  const momBear = [mom4h, mom1h, mom15m].filter(m => m.trend === 'bearish').length;
+  if (momBull === 3) { bullScore += 12; factors.push({ name:'Momentum 3/3 ↑', score:12, dir:'bull' }); }
+  else if (momBull === 2) { bullScore += 6; factors.push({ name:'Momentum 2/3 ↑', score:6, dir:'bull' }); }
+  if (momBear === 3) { bearScore += 12; factors.push({ name:'Momentum 3/3 ↓', score:12, dir:'bear' }); }
+  else if (momBear === 2) { bearScore += 6; factors.push({ name:'Momentum 2/3 ↓', score:6, dir:'bear' }); }
+
+  // RSI extremes
+  if (mom4h.rsiLevel === 'oversold') { bullScore += 8; factors.push({ name:`RSI Oversold ${mom4h.rsi.toFixed(0)}`, score:8, dir:'bull' }); }
+  if (mom4h.rsiLevel === 'overbought') { bearScore += 8; factors.push({ name:`RSI Overbought ${mom4h.rsi.toFixed(0)}`, score:8, dir:'bear' }); }
+
+  // 8. Volume
+  if (vol4h.volRatio > 1.5 && vol4h.dominance === 'bull') { bullScore += 8; factors.push({ name:'Volumen Bull ×' + vol4h.volRatio.toFixed(1), score:8, dir:'bull' }); }
+  if (vol4h.volRatio > 1.5 && vol4h.dominance === 'bear') { bearScore += 8; factors.push({ name:'Volumen Bear ×' + vol4h.volRatio.toFixed(1), score:8, dir:'bear' }); }
+
+  // 9. Liquidity sweep (high probability entry after sweep)
+  for (const lz of liq4h.slice(-2)) {
+    const dist = Math.abs(lz.price - current) / current;
+    if (dist < 0.008) {
+      if (lz.dir === 'buy-side') { bullScore += 10; factors.push({ name:'Liquidez Buy-side barrida', score:10, dir:'bull' }); }
+      if (lz.dir === 'sell-side') { bearScore += 10; factors.push({ name:'Liquidez Sell-side barrida', score:10, dir:'bear' }); }
+    }
+  }
+
+  // ── Learning: penalize repeated failure patterns ──
+  const failPatternPenalty = applyLearning(factors, bullScore, bearScore);
+  bullScore += failPatternPenalty.bull;
+  bearScore += failPatternPenalty.bear;
+
+  // ── Determine signal ──
+  const total = bullScore + bearScore;
+  const bullPct = total > 0 ? bullScore / total : 0.5;
+  const bearPct = total > 0 ? bearScore / total : 0.5;
+
+  // Normalized confidence (0-100)
+  const rawConfidence = Math.max(bullScore, bearScore);
+  const confidence = Math.min(95, Math.max(10, (rawConfidence / 80) * 100));
+
+  let signal, dir;
+  const diff = Math.abs(bullScore - bearScore);
+  const minDiff = 12;
+
+  if (diff < minDiff || confidence < 50) {
+    signal = 'WAIT';
+    dir = 'neutral';
+  } else if (bullScore > bearScore) {
+    signal = 'LONG';
+    dir = 'long';
+  } else {
+    signal = 'SHORT';
+    dir = 'short';
+  }
+
+  // ── Entry / SL / TP calculation ──
+  let entry, sl, tp1, tp2, rr;
+  const atr = calcATR(c4, 14);
+
+  if (signal === 'LONG') {
+    entry = current;
+    sl = entry - atr * 1.5;
+    const risk = entry - sl;
+    tp1 = entry + risk * 3;
+    tp2 = entry + risk * 5;
+    rr = ((tp1 - entry) / risk).toFixed(1);
+  } else if (signal === 'SHORT') {
+    entry = current;
+    sl = entry + atr * 1.5;
+    const risk = sl - entry;
+    tp1 = entry - risk * 3;
+    tp2 = entry - risk * 5;
+    rr = ((entry - tp1) / risk).toFixed(1);
+  } else {
+    entry = current; sl = null; tp1 = null; tp2 = null; rr = null;
+  }
+
+  // ── Confluence scores for UI ──
+  const smcMax = 30, elliottMax = 15, fibMax = 12, liqMax = 10, momMax = 12;
+  const dominantDir = signal === 'LONG' ? 'bull' : signal === 'SHORT' ? 'bear' : 'neutral';
+  const dirFactors = factors.filter(f => f.dir === dominantDir);
+  const uiConf = {
+    smc4h: Math.round(Math.min(100, (factors.filter(f=>f.name.includes('4H')||f.name.includes('BOS')||f.name.includes('CHoCH')||f.name.includes('OB')&&f.dir===dominantDir).reduce((s,f)=>s+f.score,0)/smcMax)*100)),
+    smc1h: Math.round(Math.min(100, (factors.filter(f=>f.name.includes('1H')&&f.dir===dominantDir).reduce((s,f)=>s+f.score,0)/12)*100)),
+    elliott: Math.round(Math.min(100, elliott4h.confidence)),
+    fibonacci: Math.round(Math.min(100, (factors.filter(f=>f.name.includes('Fib')&&f.dir===dominantDir).reduce((s,f)=>s+f.score,0)/fibMax)*100)),
+    liquidity: Math.round(Math.min(100, (factors.filter(f=>f.name.includes('Liquid')&&f.dir===dominantDir).reduce((s,f)=>s+f.score,0)/liqMax)*100)),
+    momentum: Math.round(Math.min(100, (factors.filter(f=>f.name.includes('Momentum')||f.name.includes('RSI')).filter(f=>f.dir===dominantDir).reduce((s,f)=>s+f.score,0)/momMax)*100))
+  };
+
+  // ── Reason text ──
+  const topFactors = factors.filter(f => f.dir === dominantDir).sort((a,b)=>b.score-a.score).slice(0,3);
+  const reason = topFactors.length > 0
+    ? topFactors.map(f => f.name).join(' + ')
+    : 'Confluencias mixtas, esperar claridad';
+
+  return {
+    signal, dir, confidence: Math.round(confidence),
+    entry, sl, tp1, tp2, rr,
+    bullScore, bearScore,
+    factors, uiConf, reason,
+    elliott: elliott4h, fib: fib4h,
+    struct4h, obs4h, fvgs4h, liq4h,
+    mom4h, mom1h, current, atr,
+    timestamp: Date.now()
+  };
+}
+
+function calcATR(candles, period = 14) {
+  const trs = [];
+  for (let i = 1; i < candles.length; i++) {
+    const tr = Math.max(
+      candles[i].h - candles[i].l,
+      Math.abs(candles[i].h - candles[i-1].c),
+      Math.abs(candles[i].l - candles[i-1].c)
+    );
+    trs.push(tr);
+  }
+  const last = trs.slice(-period);
+  return last.reduce((s,v)=>s+v,0) / last.length;
+}
+
+// ── Learning system ──
+function applyLearning(factors, bullScore, bearScore) {
+  let bullPenalty = 0, bearPenalty = 0;
+  const wrong = STATE.learningData.wrongPatterns;
+  for (const wf of wrong) {
+    for (const f of factors) {
+      if (f.name === wf.name && f.dir === wf.dir) {
+        if (wf.dir === 'bull') bullPenalty -= wf.penaltyWeight || 5;
+        if (wf.dir === 'bear') bearPenalty -= wf.penaltyWeight || 5;
+      }
+    }
+  }
+  return { bull: bullPenalty, bear: bearPenalty };
+}
+
+function recordLearning(signal, factors, outcome) {
+  if (outcome === 'wrong') {
+    const dominant = signal === 'LONG' ? 'bull' : 'bear';
+    for (const f of factors.filter(f=>f.dir===dominant)) {
+      const existing = STATE.learningData.wrongPatterns.find(w=>w.name===f.name&&w.dir===f.dir);
+      if (existing) existing.penaltyWeight = (existing.penaltyWeight||5) + 2;
+      else STATE.learningData.wrongPatterns.push({ name:f.name, dir:f.dir, penaltyWeight:5 });
+    }
+  } else if (outcome === 'correct') {
+    // Reduce penalty for correct patterns
+    for (const f of factors) {
+      const idx = STATE.learningData.wrongPatterns.findIndex(w=>w.name===f.name&&w.dir===f.dir);
+      if (idx !== -1) {
+        STATE.learningData.wrongPatterns[idx].penaltyWeight -= 3;
+        if (STATE.learningData.wrongPatterns[idx].penaltyWeight <= 0)
+          STATE.learningData.wrongPatterns.splice(idx,1);
+      }
+    }
+  }
+}
+
+// ── Self-test: Backtesting on last N candles ──
+function runSelfTest(candles4h, candles1h, candles15m) {
+  const results = [];
+  const step = 20; // test every 20 candles
+  const window = 200;
+
+  for (let i = window; i < candles4h.length - 30; i += step) {
+    const c4 = candles4h.slice(0, i);
+    const c1 = candles1h.slice(0, Math.floor(i * 4));
+    const c15 = candles15m.slice(0, Math.floor(i * 16));
+
+    if (c1.length < 50 || c15.length < 50) continue;
+
+    const sig = generateSignal(c4, c1.slice(-500), c15.slice(-500));
+    if (sig.signal === 'WAIT') continue;
+
+    const entry = sig.entry;
+    const sl = sig.sl;
+    const tp1 = sig.tp1;
+    const futureCandles = candles4h.slice(i, i + 24);
+
+    let outcome = 'pending';
+    for (const fc of futureCandles) {
+      if (sig.signal === 'LONG') {
+        if (fc.l <= sl) { outcome = 'wrong'; break; }
+        if (fc.h >= tp1) { outcome = 'correct'; break; }
+      } else {
+        if (fc.h >= sl) { outcome = 'wrong'; break; }
+        if (fc.l <= tp1) { outcome = 'correct'; break; }
+      }
+    }
+    if (outcome !== 'pending') results.push({ signal: sig.signal, confidence: sig.confidence, outcome });
+  }
+
+  const total = results.length;
+  const correct = results.filter(r=>r.outcome==='correct').length;
+  const wrong = results.filter(r=>r.outcome==='wrong').length;
+  const winRate = total > 0 ? Math.round(correct/total*100) : 0;
+  const avgConf = total > 0 ? Math.round(results.reduce((s,r)=>s+r.confidence,0)/total) : 0;
+  const longWins = results.filter(r=>r.signal==='LONG'&&r.outcome==='correct').length;
+  const longTotal = results.filter(r=>r.signal==='LONG').length;
+  const shortWins = results.filter(r=>r.signal==='SHORT'&&r.outcome==='correct').length;
+  const shortTotal = results.filter(r=>r.signal==='SHORT').length;
+
+  return { total, correct, wrong, winRate, avgConf,
+    longWin: longTotal > 0 ? Math.round(longWins/longTotal*100) : 0,
+    shortWin: shortTotal > 0 ? Math.round(shortWins/shortTotal*100) : 0,
+    longTotal, shortTotal };
+}
+
+// ── Self-questioning: validate pending signals ──
+function validatePendingSignals() {
+  const current = STATE.candles['4h'].length > 0 ? STATE.candles['4h'][STATE.candles['4h'].length-1].c : null;
+  if (!current) return;
+
+  for (const log of STATE.signalLog) {
+    if (log.status !== 'pending') continue;
+    const age = Date.now() - log.timestamp;
+    if (age < 3600000) continue; // wait 1h minimum
+
+    // Auto-validate: check if price moved toward signal direction
+    const priceDiff = current - log.entry;
+    if (log.signal === 'LONG') {
+      if (current >= log.tp1) { log.status = 'correct'; log.verdict = `✓ TP1 alcanzado (${f(log.tp1)})`; recordLearning(log.signal, log.factors||[], 'correct'); }
+      else if (current <= log.sl) { log.status = 'wrong'; log.verdict = `✗ SL tocado (${f(log.sl)})`; recordLearning(log.signal, log.factors||[], 'wrong'); }
+      else if (age > 86400000) { log.status = 'invalidated'; log.verdict = '⟳ Invalidada (24h sin resolución)'; }
+    } else if (log.signal === 'SHORT') {
+      if (current <= log.tp1) { log.status = 'correct'; log.verdict = `✓ TP1 alcanzado (${f(log.tp1)})`; recordLearning(log.signal, log.factors||[], 'correct'); }
+      else if (current >= log.sl) { log.status = 'wrong'; log.verdict = `✗ SL tocado (${f(log.sl)})`; recordLearning(log.signal, log.factors||[], 'wrong'); }
+      else if (age > 86400000) { log.status = 'invalidated'; log.verdict = '⟳ Invalidada (24h sin resolución)'; }
+    }
+  }
+  saveLog();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHART RENDERER — Canvas
+// ═══════════════════════════════════════════════════════════
+function drawChart(canvasId, candles, analysis, isMini = false) {
+  const canvas = document.getElementById(canvasId);
+  const container = canvas.parentElement;
+  const W = container.clientWidth || 800;
+  const H = isMini ? 120 : 420;
+  canvas.width = W;
+  canvas.height = H;
+  canvas.style.display = 'block';
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const n = isMini ? Math.min(100, candles.length) : Math.min(180, candles.length);
+  const visible = candles.slice(-n);
+
+  const volH = isMini ? 20 : 70;
+  const chartH = H - volH - (isMini ? 0 : 10);
+  const pad = { l: isMini ? 6 : 60, r: 10, t: isMini ? 8 : 20 };
+
+  let maxH = -Infinity, minL = Infinity;
+  for (const c of visible) { if (c.h > maxH) maxH = c.h; if (c.l < minL) minL = c.l; }
+  const priceRange = maxH - minL;
+  const margin = priceRange * 0.05;
+  const high = maxH + margin, low = minL - margin;
+  const range = high - low;
+
+  const px = i => pad.l + (i / (n-1)) * (W - pad.l - pad.r);
+  const py = p => pad.t + chartH - ((p - low) / range) * chartH;
+
+  // Background
+  ctx.fillStyle = '#0b0f1a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid
+  if (!isMini) {
+    ctx.strokeStyle = '#1a2030';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 5; i++) {
+      const y = pad.t + (i / 5) * chartH;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      const price = high - (i / 5) * range;
+      ctx.fillStyle = '#3a4a5a';
+      ctx.font = '9px Space Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(price.toFixed(0), pad.l - 4, y + 3);
+    }
+    // Vertical grid
+    for (let i = 0; i <= 6; i++) {
+      const x = pad.l + (i/6)*(W-pad.l-pad.r);
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t+chartH); ctx.stroke();
+    }
+  }
+
+  // FVGs
+  if (analysis && analysis.fvgs4h) {
+    for (const fvg of analysis.fvgs4h) {
+      if (fvg.idx < n-10) continue;
+      const relIdx = fvg.idx - (candles.length - n);
+      if (relIdx < 0) continue;
+      const x = px(relIdx);
+      const y1 = py(fvg.high), y2 = py(fvg.low);
+      ctx.fillStyle = fvg.dir === 'bullish' ? 'rgba(0,230,118,0.06)' : 'rgba(255,61,90,0.06)';
+      ctx.fillRect(x, Math.min(y1,y2), W-pad.r-x, Math.abs(y2-y1));
+    }
+  }
+
+  // Order Blocks
+  if (analysis && analysis.obs4h && !isMini) {
+    for (const ob of analysis.obs4h) {
+      const y1 = py(ob.high), y2 = py(ob.low);
+      ctx.fillStyle = ob.dir === 'bullish' ? 'rgba(179,136,255,0.1)' : 'rgba(255,109,0,0.1)';
+      ctx.strokeStyle = ob.dir === 'bullish' ? 'rgba(179,136,255,0.4)' : 'rgba(255,109,0,0.4)';
+      ctx.lineWidth = 0.5;
+      ctx.fillRect(pad.l, Math.min(y1,y2), W-pad.l-pad.r, Math.abs(y2-y1));
+      ctx.strokeRect(pad.l, Math.min(y1,y2), W-pad.l-pad.r, Math.abs(y2-y1));
+      if (!isMini) {
+        ctx.fillStyle = ob.dir === 'bullish' ? 'rgba(179,136,255,0.8)' : 'rgba(255,109,0,0.8)';
+        ctx.font = '8px Space Mono, monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(`OB ${ob.dir === 'bullish' ? '▲' : '▼'}`, pad.l + 2, Math.min(y1,y2) - 2);
+      }
+    }
+  }
+
+  // Fibonacci lines
+  if (analysis && analysis.fib && !isMini) {
+    const importantLevels = ['0.382', '0.5', '0.618', '1.618'];
+    for (const lv of analysis.fib.levels) {
+      if (!importantLevels.includes(lv.label)) continue;
+      const y = py(lv.price);
+      if (y < pad.t || y > pad.t + chartH) continue;
+      ctx.setLineDash([3, 5]);
+      ctx.strokeStyle = lv.label === '0.618' ? 'rgba(255,214,0,0.5)' : 'rgba(255,214,0,0.2)';
+      ctx.lineWidth = lv.label === '0.618' ? 1 : 0.5;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W-pad.r, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,214,0,0.7)';
+      ctx.font = '8px Space Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${lv.label} ${lv.price.toFixed(0)}`, W-pad.r-2, y-2);
+    }
+  }
+
+  // Signal levels
+  if (analysis && analysis.signal !== 'WAIT' && !isMini) {
+    if (analysis.sl) {
+      const ySL = py(analysis.sl);
+      ctx.setLineDash([4,4]);
+      ctx.strokeStyle = 'rgba(255,61,90,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(pad.l, ySL); ctx.lineTo(W-pad.r, ySL); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(255,61,90,0.9)';
+      ctx.font = '9px Space Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`SL ${analysis.sl.toFixed(0)}`, W-pad.r-2, ySL - 3);
+    }
+    if (analysis.tp1) {
+      const yTP = py(analysis.tp1);
+      ctx.setLineDash([4,4]);
+      ctx.strokeStyle = 'rgba(0,230,118,0.7)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(pad.l, yTP); ctx.lineTo(W-pad.r, yTP); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(0,230,118,0.9)';
+      ctx.font = '9px Space Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`TP1 ${analysis.tp1.toFixed(0)}`, W-pad.r-2, yTP - 3);
+    }
+    if (analysis.tp2) {
+      const yTP2 = py(analysis.tp2);
+      if (yTP2 > pad.t && yTP2 < pad.t + chartH) {
+        ctx.setLineDash([2,6]);
+        ctx.strokeStyle = 'rgba(0,230,118,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad.l, yTP2); ctx.lineTo(W-pad.r, yTP2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(0,230,118,0.6)';
+        ctx.font = '8px Space Mono, monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(`TP2 ${analysis.tp2.toFixed(0)}`, W-pad.r-2, yTP2 - 3);
+      }
+    }
+  }
+
+  // Candles
+  const candleW = Math.max(1, (W - pad.l - pad.r) / n - 1);
+  for (let i = 0; i < visible.length; i++) {
+    const c = visible[i];
+    const x = px(i);
+    const isBull = c.c >= c.o;
+    const color = isBull ? '#00e676' : '#ff3d5a';
+    const colorDim = isBull ? '#005c2e' : '#660018';
+
+    // Wick
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, py(c.h));
+    ctx.lineTo(x, py(c.l));
+    ctx.stroke();
+
+    // Body
+    const bodyTop = py(Math.max(c.o, c.c));
+    const bodyBot = py(Math.min(c.o, c.c));
+    const bodyH = Math.max(1, bodyBot - bodyTop);
+    ctx.fillStyle = isBull ? (candleW > 3 ? '#00e676' : '#00e676') : (candleW > 3 ? '#ff3d5a' : '#ff3d5a');
+    ctx.fillRect(x - candleW/2, bodyTop, candleW, bodyH);
+  }
+
+  // BOS / CHoCH markers
+  if (analysis && analysis.struct4h && !isMini) {
+    const events = analysis.struct4h.events.slice(-5);
+    for (const ev of events) {
+      const relIdx = ev.idx - (candles.length - n);
+      if (relIdx < 0 || relIdx >= n) continue;
+      const x = px(relIdx);
+      const y = py(ev.price);
+      const color = ev.type === 'CHoCH' ? '#ff3d5a' : '#00e676';
+      ctx.fillStyle = color;
+      ctx.font = 'bold 8px Space Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(ev.type, x, y - 8);
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  // Current price line
+  const lastC = visible[visible.length-1];
+  const yNow = py(lastC.c);
+  ctx.strokeStyle = 'rgba(0,212,255,0.6)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2,3]);
+  ctx.beginPath(); ctx.moveTo(pad.l, yNow); ctx.lineTo(W-pad.r, yNow); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Volume bars
+  const maxVol = Math.max(...visible.map(c=>c.v));
+  for (let i = 0; i < visible.length; i++) {
+    const c = visible[i];
+    const x = px(i);
+    const volBarH = (c.v / maxVol) * volH * 0.9;
+    ctx.fillStyle = c.c >= c.o ? 'rgba(0,230,118,0.25)' : 'rgba(255,61,90,0.25)';
+    ctx.fillRect(x - candleW/2, H - volBarH, candleW, volBarH);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI UPDATES
+// ═══════════════════════════════════════════════════════════
+function f(price) { return price ? '$' + price.toLocaleString('en-US', {maximumFractionDigits:2}) : '---'; }
+
+function updateSignalUI(analysis) {
+  const badge = document.getElementById('signal-badge');
+  badge.className = 'signal-badge ' + analysis.signal.toLowerCase();
+  badge.textContent = analysis.signal;
+
+  document.getElementById('signal-title').textContent =
+    analysis.signal === 'LONG' ? '📈 ENTRADA LONG — ' + f(analysis.entry) :
+    analysis.signal === 'SHORT' ? '📉 ENTRADA SHORT — ' + f(analysis.entry) :
+    '⏳ ESPERAR — Sin confluencia suficiente';
+
+  document.getElementById('signal-reason').textContent = analysis.reason;
+  document.getElementById('price-display').textContent = f(analysis.current);
+
+  document.getElementById('entry-val').textContent = f(analysis.entry);
+  document.getElementById('sl-val').textContent = analysis.sl ? f(analysis.sl) : '---';
+  document.getElementById('tp1-val').textContent = analysis.tp1 ? f(analysis.tp1) : '---';
+  document.getElementById('tp2-val').textContent = analysis.tp2 ? f(analysis.tp2) : '---';
+  document.getElementById('rr-val').textContent = analysis.rr ? '1:' + analysis.rr : '---';
+
+  const pct = analysis.confidence;
+  document.getElementById('conf-pct').textContent = pct + '%';
+  document.getElementById('conf-bar').style.width = pct + '%';
+  document.getElementById('conf-bar').style.background =
+    pct >= 70 ? 'linear-gradient(90deg,#00c853,#00e676)' :
+    pct >= 55 ? 'linear-gradient(90deg,#0088bb,#00d4ff)' :
+    'linear-gradient(90deg,#b27000,#ffd600)';
+}
+
+function updateConfluenceUI(uiConf) {
+  const bars = [
+    ['cs-smc4h', uiConf.smc4h, 'var(--purple)'],
+    ['cs-smc1h', uiConf.smc1h, 'var(--purple)'],
+    ['cs-ell', uiConf.elliott, 'var(--cyan)'],
+    ['cs-fib', uiConf.fibonacci, 'var(--yellow)'],
+    ['cs-liq', uiConf.liquidity, 'var(--orange)'],
+    ['cs-mom', uiConf.momentum, 'var(--accent)']
+  ];
+  const rows = document.querySelectorAll('.conf-row');
+  bars.forEach(([id, val, color], i) => {
+    document.getElementById(id).textContent = val;
+    document.getElementById(id).style.color = val >= 60 ? color : 'var(--text3)';
+    const fill = rows[i]?.querySelector('.conf-bar-fill');
+    if (fill) { fill.style.width = val + '%'; fill.style.background = color; }
+  });
+}
+
+function updateElliottUI(elliott) {
+  const el = document.getElementById('elliott-display');
+  if (elliott.pattern === 'unclear') {
+    el.innerHTML = '<span style="color:var(--text3);font-size:12px">Patrón no claro</span>';
+    return;
+  }
+  const isBull = elliott.pattern === 'impulse-bull';
+  const waves = ['1','2','3','4','5'];
+  el.innerHTML = waves.map((w,i) => {
+    const wNum = parseInt(w);
+    const isActive = wNum === elliott.currentWave;
+    const isPast = wNum < elliott.currentWave;
+    const cls = isActive ? 'wave-tag active' : isPast ? `wave-tag ${isBull?'impulse':'corrective'}` : 'wave-tag';
+    return `<span class="${cls}">${isBull?'▲':'▼'}${w}</span>`;
+  }).join('');
+
+  const corrective = ['A','B','C'];
+  if (elliott.currentWave >= 5) {
+    el.innerHTML += corrective.map(w => `<span class="wave-tag corrective">${w}</span>`).join('');
+  }
+
+  document.getElementById('elliott-context').textContent = elliott.context;
+}
+
+function updateFibUI(fib) {
+  const el = document.getElementById('fib-grid');
+  if (!fib.levels) { el.innerHTML = '<span style="color:var(--text3);font-size:12px">Sin datos</span>'; return; }
+
+  const show = fib.levels.filter(l => ['0.236','0.382','0.5','0.618','0.786','1.272','1.618'].includes(l.label));
+  el.innerHTML = show.map(lv => {
+    const dist = fib.current ? ((fib.current - lv.price)/fib.current*100).toFixed(1) : '';
+    const isNear = fib.nearest && fib.nearest.label === lv.label;
+    const col = lv.label === '0.618' ? 'var(--yellow)' : lv.type === 'extension' ? 'var(--cyan)' : 'var(--text)';
+    return `<div class="fib-row ${isNear?'active-fib':''}">
+      <span class="fib-level" style="color:${lv.label==='0.618'?'var(--yellow)':'inherit'}">${lv.label}</span>
+      <span class="fib-price" style="color:${col}">${lv.price.toFixed(0)}</span>
+      <span class="fib-dist" style="color:${parseFloat(dist)<0?'var(--red)':'var(--green)'}">${dist}%</span>
+    </div>`;
+  }).join('');
+}
+
+function updateSMCUI(analysis) {
+  const el = document.getElementById('smc-list');
+  const items = [];
+  const recentEvts = analysis.struct4h.events.slice(-4);
+  for (const ev of recentEvts) {
+    items.push(`<div class="smc-item">
+      <span class="smc-tag ${ev.type.toLowerCase()}">${ev.type}</span>
+      <span style="font-size:10px;color:${ev.dir==='bullish'?'var(--green)':'var(--red)'}">${ev.dir==='bullish'?'▲':'▼'}</span>
+      <span class="smc-price">${ev.price.toFixed(0)}</span>
+      <span class="smc-tf">4H</span>
+    </div>`);
+  }
+  for (const ob of analysis.obs4h.slice(-2)) {
+    items.push(`<div class="smc-item">
+      <span class="smc-tag ob">OB</span>
+      <span style="font-size:10px;color:${ob.dir==='bullish'?'var(--green)':'var(--red)'}">${ob.dir==='bullish'?'▲':'▼'}</span>
+      <span class="smc-price">${ob.mid.toFixed(0)}</span>
+      <span class="smc-tf">4H</span>
+    </div>`);
+  }
+  for (const fvg of analysis.fvgs4h.slice(-2)) {
+    items.push(`<div class="smc-item">
+      <span class="smc-tag fvg">FVG</span>
+      <span style="font-size:10px;color:${fvg.dir==='bullish'?'var(--green)':'var(--red)'}">${fvg.dir==='bullish'?'▲':'▼'}</span>
+      <span class="smc-price">${((fvg.high+fvg.low)/2).toFixed(0)}</span>
+      <span class="smc-tf">4H</span>
+    </div>`);
+  }
+  el.innerHTML = items.length > 0 ? items.join('') : '<span style="color:var(--text3);font-size:12px">Sin eventos recientes</span>';
+}
+
+function updateSelfTestUI(results) {
+  const el = document.getElementById('selftest-grid');
+  if (!results) { el.innerHTML = '<span style="color:var(--text3)">Ejecutando backtesting...</span>'; return; }
+  const checks = [
+    { icon:'📊', label:'Señales totales testeadas', val:`${results.total}`, cls:results.total>10?'ok':'warn' },
+    { icon:'🎯', label:'Win Rate general', val:`${results.winRate}%`, cls:results.winRate>=60?'ok':results.winRate>=45?'warn':'fail' },
+    { icon:'📈', label:'Win Rate LONG', val:`${results.longWin}% (${results.longTotal})`, cls:results.longWin>=55?'ok':'warn' },
+    { icon:'📉', label:'Win Rate SHORT', val:`${results.shortWin}% (${results.shortTotal})`, cls:results.shortWin>=55?'ok':'warn' },
+    { icon:'🧠', label:'Confianza media señales', val:`${results.avgConf}%`, cls:results.avgConf>=60?'ok':'warn' },
+    { icon:'⚡', label:'Patrones aprendidos (err)', val:`${STATE.learningData.wrongPatterns.length}`, cls:'ok' }
+  ];
+  el.innerHTML = checks.map(c => `
+    <div class="selftest-row">
+      <span class="selftest-icon">${c.icon}</span>
+      <span class="selftest-label">${c.label}</span>
+      <span class="selftest-result ${c.cls}">${c.val}</span>
+    </div>`).join('');
+}
+
+function addToLog(analysis) {
+  // Only log if LONG or SHORT and not duplicate recent
+  if (analysis.signal === 'WAIT') return;
+  const last = STATE.signalLog[STATE.signalLog.length-1];
+  if (last && last.signal === analysis.signal && Date.now() - last.timestamp < 14400000) return; // 4h dedup
+
+  const entry = {
+    id: Date.now(),
+    signal: analysis.signal,
+    entry: analysis.entry,
+    sl: analysis.sl,
+    tp1: analysis.tp1,
+    tp2: analysis.tp2,
+    rr: analysis.rr,
+    confidence: analysis.confidence,
+    reason: analysis.reason,
+    factors: analysis.factors,
+    timestamp: Date.now(),
+    status: 'pending',
+    verdict: null
+  };
+  STATE.signalLog.push(entry);
+  saveLog();
+  updateLogUI();
+  updateStatsUI();
+}
+
+function updateLogUI() {
+  const el = document.getElementById('log-list');
+  if (STATE.signalLog.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:12px">Sin señales aún...</span>';
+    return;
+  }
+  el.innerHTML = [...STATE.signalLog].reverse().slice(0,20).map(log => {
+    const dt = new Date(log.timestamp).toLocaleString('es-ES',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<div class="log-item ${log.status}">
+      <div class="log-header">
+        <span class="log-signal ${log.signal}">${log.signal}</span>
+        <span class="log-time">${dt} · ${log.confidence}%</span>
+      </div>
+      <div class="log-body">${log.reason}</div>
+      <div class="log-body">Entry: ${f(log.entry)} | SL: ${f(log.sl)} | TP1: ${f(log.tp1)}</div>
+      ${log.verdict ? `<div class="log-verdict ${log.status}">${log.verdict}</div>` : '<div class="log-verdict pending">⏳ PENDIENTE</div>'}
+    </div>`;
+  }).join('');
+}
+
+function updateStatsUI() {
+  const total = STATE.signalLog.filter(l=>l.signal!=='WAIT').length;
+  const correct = STATE.signalLog.filter(l=>l.status==='correct').length;
+  const wrong = STATE.signalLog.filter(l=>l.status==='wrong').length;
+  const acc = (total-correct-wrong) > 0 || total === 0 ? (correct+wrong>0?Math.round(correct/(correct+wrong)*100):0) : Math.round(correct/total*100);
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-acc').textContent = (correct+wrong>0?Math.round(correct/(correct+wrong)*100):0) + '%';
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MAIN FLOW
+// ═══════════════════════════════════════════════════════════
+function setStatus(msg, state='loading') {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot ' + state;
+  document.getElementById('status-text').textContent = msg.toUpperCase();
+}
+
+async function loadAllData() {
+  STATE.isLoading = true;
+  setStatus('Conectando a CoinEx API...', 'loading');
+  document.getElementById('chart-loading').style.display = 'flex';
+  document.getElementById('main-chart').style.display = 'none';
+
+  const market = 'ETHUSDT';
+  const results = await Promise.all([
+    fetchCandles(market, TF_MAP['4h'], 1000),
+    fetchCandles(market, TF_MAP['1h'], 1000),
+    fetchCandles(market, TF_MAP['15m'], 1000)
+  ]);
+
+  const [c4h, c1h, c15m] = results;
+
+  if (!c4h || c4h.length < 50) {
+    setStatus('Error de conexión — Reintentando...', 'error');
+    setTimeout(loadAllData, 5000);
+    return;
+  }
+
+  STATE.candles['4h'] = c4h;
+  STATE.candles['1h'] = c1h || c4h;
+  STATE.candles['15m'] = c15m || c4h;
+
+  const cnt = c4h.length;
+  document.getElementById('status-candles').textContent = `4H:${c4h.length} 1H:${(c1h||[]).length} 15M:${(c15m||[]).length} VELAS`;
+  setStatus(`LIVE — ETH/USDT`, 'live');
+  STATE.lastUpdate = new Date();
+  document.getElementById('status-time').textContent = STATE.lastUpdate.toLocaleTimeString('es-ES');
+
+  // Run analysis
+  const analysis = generateSignal(c4h, STATE.candles['1h'], STATE.candles['15m']);
+  STATE.analysis = analysis;
+
+  // Self-test (runs on background data)
+  setStatus('Ejecutando auto-test de estrategia...', 'loading');
+  setTimeout(() => {
+    const testResults = runSelfTest(c4h, STATE.candles['1h'], STATE.candles['15m']);
+    STATE.selfTestResults = testResults;
+    updateSelfTestUI(testResults);
+    setStatus('LIVE — ETH/USDT', 'live');
+  }, 100);
+
+  // Update UI
+  updateSignalUI(analysis);
+  updateConfluenceUI(analysis.uiConf);
+  updateElliottUI(analysis.elliott);
+  updateFibUI(analysis.fib);
+  updateSMCUI(analysis);
+
+  // Charts
+  document.getElementById('chart-loading').style.display = 'none';
+  drawChart('main-chart', c4h, analysis);
+  drawChart('chart-1h', STATE.candles['1h'], null, true);
+  drawChart('chart-15m', STATE.candles['15m'], null, true);
+
+  // Log signal
+  addToLog(analysis);
+  validatePendingSignals();
+  updateLogUI();
+  updateStatsUI();
+
+  STATE.isLoading = false;
+}
+
+function switchTF(tf) {
+  STATE.currentTF = tf;
+  ['4h','1h','15m'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tf);
+  });
+  if (STATE.candles[tf].length > 0) {
+    drawChart('main-chart', STATE.candles[tf], tf==='4h' ? STATE.analysis : null);
+    document.getElementById('chart-overlay').textContent = tf.toUpperCase() + ' — ETHUSDT';
+    document.getElementById('price-change-display').textContent = 'ETHUSDT · ' + tf.toUpperCase();
+  }
+}
+
+function refreshAll() {
+  if (STATE.isLoading) return;
+  loadAllData();
+}
+
+function downloadLog() {
+  const data = {
+    generated: new Date().toISOString(),
+    pair: 'ETHUSDT',
+    system: 'ETH Analyst — SMC·Elliott·Fib',
+    learningData: STATE.learningData,
+    selfTestResults: STATE.selfTestResults,
+    signals: STATE.signalLog
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `eth-signals-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Crosshair for main chart
+const mainChartContainer = document.getElementById('main-chart-container');
+const crosshairEl = document.getElementById('crosshair-info');
+mainChartContainer.addEventListener('mousemove', e => {
+  const canvas = document.getElementById('main-chart');
+  if (!canvas || !STATE.candles[STATE.currentTF].length) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const candles = STATE.candles[STATE.currentTF];
+  const n = Math.min(180, candles.length);
+  const visible = candles.slice(-n);
+  const pad = { l: 60, r: 10 };
+  const W = canvas.width;
+  const idx = Math.round((x - pad.l) / (W - pad.l - pad.r) * (n-1));
+  if (idx >= 0 && idx < visible.length) {
+    const c = visible[idx];
+    const dt = new Date(c.t).toLocaleDateString('es-ES');
+    crosshairEl.style.display = 'block';
+    crosshairEl.innerHTML = `O: ${c.o.toFixed(2)}&nbsp; H: <span style="color:var(--green)">${c.h.toFixed(2)}</span>&nbsp; L: <span style="color:var(--red)">${c.l.toFixed(2)}</span>&nbsp; C: ${c.c.toFixed(2)}<br>${dt}`;
+  }
+});
+mainChartContainer.addEventListener('mouseleave', () => { crosshairEl.style.display = 'none'; });
+
+// Auto-refresh every 4 minutes
+setInterval(() => { if (!STATE.isLoading) refreshAll(); }, 240000);
+
+// Auto-validate pending signals every 30s
+setInterval(() => { validatePendingSignals(); updateLogUI(); updateStatsUI(); }, 30000);
+
+// Init
+loadAllData();
+</script>
+</body>
+</html>
